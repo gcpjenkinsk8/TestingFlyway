@@ -1,0 +1,30 @@
+name: Flyway Migration
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your main branch name or other branches you want to trigger migrations on.
+
+jobs:
+  flyway_migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'  # Adjust to the Java version compatible with Flyway.
+
+      - name: Run Flyway Migrations
+        run: |
+          wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.0.1/flyway-commandline-8.0.1-linux-x64.tar.gz | tar xvz
+          export FLYWAY_HOME=$(pwd)/flyway-8.0.1
+          export PATH=$PATH:$FLYWAY_HOME
+          flyway migrate -configFile=flyway.conf
+        env:
+          FLYWAY_URL: ${{ secrets.FLYWAY_URL }}
+          FLYWAY_USER: ${{ secrets.FLYWAY_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.FLYWAY_PASSWORD }}
